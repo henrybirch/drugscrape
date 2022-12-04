@@ -1,5 +1,5 @@
+import scalaz.MonadState.Get
 @main def hello: Unit =
-  println("Hello world!")
-  println(msg)
-
-def msg = "I was compiled by Scala 3. :)"
+  GetDrugsDf.GetDrugsDf.writeDirtyDfToParquet(
+    "data/output.parquet"
+  )

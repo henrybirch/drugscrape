@@ -8,13 +8,22 @@ import org.apache.spark.sql.types.{
   ArrayType
 }
 
-object getDrugsDf {
+object GetDrugsDf {
   val spark =
-    SparkSession.builder.appName("GetDrugsDf").master("local[*]").getOrCreate()
+    SparkSession
+      .builder()
+      .appName("GetDrugsDf")
+      .master("local[1]")
+      .getOrCreate()
 
   lazy val allDrugs =
     spark.sparkContext.parallelize(DrugScrape.getAllDrugTests.toSeq)
-  def getDirtyDf =
+
+  def writeDirtyDfToParquet(path: String) =
+    val dirtyDf = getDirtyDf
+    dirtyDf.write.parquet(path)
+
+  private def getDirtyDf: DataFrame =
     spark.createDataFrame(allDrugs, getDrugsDfSchema)
 
   private def getDrugsDfSchema: StructType = StructType(
