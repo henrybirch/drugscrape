@@ -4,32 +4,23 @@ import net.ruippeixotog.scalascraper.dsl.DSL._
 import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
 import net.ruippeixotog.scalascraper.dsl.DSL.Parse._
 import net.ruippeixotog._
+import org.apache.spark.sql.Row
+
 object DrugScrape {
   lazy val browser = JsoupBrowser()
   val drugsDataRootUrl = "https://www.drugsdata.org/"
   val allTestsUrl =
-    drugsDataRootUrl + "index.php?sort=DatePublishedU+desc&start=0&a=&search_field=-&m1=-1&m2=-1&sold_as_ecstasy=both&datefield=tested&max=15000"
+    drugsDataRootUrl + "index.php?sort=DatePublishedU+desc&start=0&a=&search_field=-&m1=-1&m2=-1&sold_as_ecstasy=both&datefield=tested&max=10"
 
   lazy val doc = browser.get(allTestsUrl)
 
-  case class DrugTestRow(
-      soldAs: String,
-      sampleName: String,
-      substances: Iterable[String],
-      amounts: Iterable[String],
-      testDate: String,
-      srcLocation: String,
-      submitterLocation: String,
-      colour: String,
-      size: String
-  )
-  def getAllDrugTests: Seq[DrugTestRow] =
+  def getAllDrugTests: Iterable[Row] =
     val mainTable = doc >> element("#MainResults") >> element("tbody")
-    mainTable.children.map(getTableRow).toSeq
+    mainTable.children.map(getTableRow)
 
   def getTableRow(
       rowElement: scalascraper.model.Element
-  ): DrugTestRow =
+  ): Row =
     val sampleNameElement = rowElement >> element(".sample-name")
     val singleDrugTestPage =
       browser.get(getDrugTestUrl(sampleNameElement))
@@ -42,17 +33,16 @@ object DrugScrape {
     val sampleName = (sampleNameElement >> element("a")).text
     val substances =
       (for li <- (rowElement >> element(".Substance")).children
-      yield li.text)
+      yield li.text).toArray
     val amounts =
       (for li <- (rowElement >> element(".Amounts")).children
-      yield li.text)
+      yield li.text).toArray
     val testDate = tbody.select(":eq(1)").head.text
     val srcLocation = getDrugTestTbodyAttribute(tbody, 2)
     val submitterLocation = getDrugTestTbodyAttribute(tbody, 3)
     val colour = getDrugTestTbodyAttribute(tbody, 4)
     val size = getDrugTestTbodyAttribute(tbody, 5)
-
-    DrugTestRow(
+    Row(
       soldAs,
       sampleName,
       substances,
