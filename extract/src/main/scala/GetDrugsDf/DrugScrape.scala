@@ -29,19 +29,19 @@ object DrugScrape {
         ".TabletDataRight"
       ) >> element("tbody")
 
-    val soldAs = (sampleNameElement >> element(".sold-as")).text
-    val sampleName = (sampleNameElement >> element("a")).text
-    val substances =
+    val soldAs: String = (sampleNameElement >> element(".sold-as")).text
+    val sampleName: String = (sampleNameElement >> element("a")).text
+    val substances: Array[String] =
       (for li <- (rowElement >> element(".Substance")).children
       yield li.text).toArray
-    val amounts =
+    val amounts: Array[String] =
       (for li <- (rowElement >> element(".Amounts")).children
       yield li.text).toArray
-    val testDate = tbody.select(":eq(1)").head.text
-    val srcLocation = getDrugTestTbodyAttribute(tbody, 2)
-    val submitterLocation = getDrugTestTbodyAttribute(tbody, 3)
-    val colour = getDrugTestTbodyAttribute(tbody, 4)
-    val size = getDrugTestTbodyAttribute(tbody, 5)
+    val testDate: String = tbody.select(":eq(1)").head.text
+    val srcLocation: String = getDrugTestTbodyAttribute(tbody, 2)
+    val submitterLocation: String = getDrugTestTbodyAttribute(tbody, 3)
+    val colour: String = getDrugTestTbodyAttribute(tbody, 4)
+    val size: String = getDrugTestTbodyAttribute(tbody, 5)
     Row(
       soldAs,
       sampleName,
