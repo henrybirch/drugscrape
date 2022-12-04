@@ -1,5 +1,0 @@
-package GetDataFrame
-
-object getDrugsDf {
-  
-}
