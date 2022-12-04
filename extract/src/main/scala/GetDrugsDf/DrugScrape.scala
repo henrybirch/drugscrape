@@ -5,9 +5,13 @@ import net.ruippeixotog.scalascraper.dsl.DSL.Extract._
 import net.ruippeixotog.scalascraper.dsl.DSL.Parse._
 import net.ruippeixotog._
 import org.apache.spark.sql.Row
+import org.jsoup.Connection
 
 object DrugScrape {
-  lazy val browser = JsoupBrowser()
+  lazy val browser = new JsoupBrowser {
+    override def requestSettings(conn: Connection): Connection =
+      conn.timeout(30 * 60000)
+  }
   val drugsDataRootUrl = "https://www.drugsdata.org/"
   val allTestsUrl =
     drugsDataRootUrl + "index.php?sort=DatePublishedU+desc&start=0&a=&search_field=-&m1=-1&m2=-1&sold_as_ecstasy=both&datefield=tested&max=14712"
