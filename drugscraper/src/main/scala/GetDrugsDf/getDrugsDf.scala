@@ -1,3 +1,0 @@
-package GetDrugsDf
-
-object getDrugsDf {}
