@@ -14,11 +14,8 @@ object getDrugsDf {
 
   lazy val allDrugs =
     spark.sparkContext.parallelize(DrugScrape.getAllDrugTests.toSeq)
-  
-  private def getDirtyDf =
+  def getDirtyDf =
     spark.createDataFrame(allDrugs, getDrugsDfSchema)
-
-  def writeDirtyDrug
 
   private def getDrugsDfSchema: StructType = StructType(
     Array(
