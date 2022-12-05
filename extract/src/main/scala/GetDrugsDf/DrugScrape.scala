@@ -25,28 +25,29 @@ object DrugScrape {
   def getTableRow(
       rowElement: scalascraper.model.Element
   ): Row =
-    val sampleNameElement = rowElement >> element(".sample-name")
+    val sampleNameElement = (rowElement >> element(".sample-name"))
+
     val singleDrugTestPage =
       browser.get(getDrugTestUrl(sampleNameElement))
+
     val tbody =
       singleDrugTestPage >> element(".DetailsModule") >> element(
         ".TabletDataRight"
       ) >> element("tbody")
 
-    val soldAs: String = (sampleNameElement >> element(".sold-as")).text
-    val sampleName: String = (sampleNameElement >> element("a")).text
-    val substances: Array[String] =
-      (for li <- (rowElement >> element(".Substance")).children
-      yield li.text).toArray
-    val amounts: Array[String] =
-      (for li <- (rowElement >> element(".Amounts")).children
-      yield li.text).toArray
+    val soldAs =
+      (sampleNameElement >?> text(".sold-as")).getOrElse("")
+    val sampleName: String =
+      (sampleNameElement >?> element("a")).map(_.text).getOrElse("")
+    val substances = (rowElement >?> texts(".Substance")).getOrElse(List())
+    val amounts = (rowElement >?> texts(".Amounts")).getOrElse(List())
     val testDate: String = tbody.select(":eq(1)").head.text
     val srcLocation: String = getDrugTestTbodyAttribute(tbody, 2)
     val submitterLocation: String = getDrugTestTbodyAttribute(tbody, 3)
     val colour: String = getDrugTestTbodyAttribute(tbody, 4)
     val size: String = getDrugTestTbodyAttribute(tbody, 5)
-    Row(
+
+    val row = Row(
       soldAs,
       sampleName,
       substances,
@@ -57,11 +58,14 @@ object DrugScrape {
       colour,
       size
     )
+    println(row)
+    row
 
   private def getDrugTestUrl(
       sampleNameElementInRow: scalascraper.model.Element
   ): String =
-    drugsDataRootUrl + (sampleNameElementInRow >> element("a")).attr("href")
+    drugsDataRootUrl + (sampleNameElementInRow >> element("a"))
+      .attr("href")
 
   private def getDrugTestTbodyAttribute(
       tbody: scalascraper.model.Element,
