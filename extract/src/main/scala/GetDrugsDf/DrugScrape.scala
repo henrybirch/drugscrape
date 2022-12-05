@@ -14,7 +14,7 @@ object DrugScrape {
   }
   val drugsDataRootUrl = "https://www.drugsdata.org/"
   val allTestsUrl =
-    drugsDataRootUrl + "index.php?sort=DatePublishedU+desc&start=0&a=&search_field=-&m1=-1&m2=-1&sold_as_ecstasy=both&datefield=tested&max=10"
+    drugsDataRootUrl + "index.php?sort=DatePublishedU+desc&start=0&a=&search_field=-&m1=-1&m2=-1&sold_as_ecstasy=both&datefield=tested&max=14712"
 
   lazy val doc = browser.get(allTestsUrl)
 
