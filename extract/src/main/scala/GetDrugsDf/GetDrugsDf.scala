@@ -21,13 +21,14 @@ object GetDrugsDf {
 
   def writeDirtyDfToParquet(path: String) =
     val dirtyDf = getDirtyDf
-    dirtyDf.write.parquet(path)
+    dirtyDf.write.mode("overwrite").parquet(path)
 
   private def getDirtyDf: DataFrame =
     spark.createDataFrame(allDrugs, getDrugsDfSchema)
 
   private def getDrugsDfSchema: StructType = StructType(
     Array(
+      StructField("id", StringType),
       StructField("soldAs", StringType),
       StructField("sampleName", StringType),
       StructField("substances", ArrayType(StringType)),

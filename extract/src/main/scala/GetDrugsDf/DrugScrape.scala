@@ -14,7 +14,7 @@ object DrugScrape {
   }
   val drugsDataRootUrl = "https://www.drugsdata.org/"
   val allTestsUrl =
-    drugsDataRootUrl + "index.php?sort=DatePublishedU+desc&start=0&a=&search_field=-&m1=-1&m2=-1&sold_as_ecstasy=both&datefield=tested&max=14712"
+    drugsDataRootUrl + "index.php?sort=DatePublishedU+desc&start=0&a=&search_field=-&m1=-1&m2=-1&sold_as_ecstasy=both&datefield=tested&max=10"
 
   lazy val doc = browser.get(allTestsUrl)
 
@@ -27,27 +27,44 @@ object DrugScrape {
   ): Row =
     val sampleNameElement = (rowElement >> element(".sample-name"))
 
-    val singleDrugTestPage =
-      browser.get(getDrugTestUrl(sampleNameElement))
+    val singleDrugTestPage = browser.get(getDrugTestUrl(sampleNameElement))
 
-    val tbody =
-      singleDrugTestPage >> element(".DetailsModule") >> element(
+    val detailsModule = singleDrugTestPage >> element(".DetailsModule")
+
+    val rightTbody =
+      detailsModule >> element(
         ".TabletDataRight"
       ) >> element("tbody")
 
+    val leftTbody = detailsModule >> element(
+      ".TabletDataLeft"
+    ) >> element("tbody")
+
+    val id = leftTbody.select(":eq(1)").head.text
+
     val soldAs =
       (sampleNameElement >?> text(".sold-as")).getOrElse("")
-    val sampleName: String =
-      (sampleNameElement >?> element("a")).map(_.text).getOrElse("")
-    val substances = (rowElement >?> texts(".Substance")).getOrElse(List())
-    val amounts = (rowElement >?> texts(".Amounts")).getOrElse(List())
-    val testDate: String = tbody.select(":eq(1)").head.text
-    val srcLocation: String = getDrugTestTbodyAttribute(tbody, 2)
-    val submitterLocation: String = getDrugTestTbodyAttribute(tbody, 3)
-    val colour: String = getDrugTestTbodyAttribute(tbody, 4)
-    val size: String = getDrugTestTbodyAttribute(tbody, 5)
+
+    val sampleName =
+      (sampleNameElement >?> text("a")).getOrElse("")
+
+    val substances =
+      (rowElement >?> texts(".Substance li")).getOrElse(List())
+
+    val amounts = (rowElement >?> texts(".Amounts li")).getOrElse(List())
+
+    val testDate = rightTbody.select(":eq(1)").head.text
+
+    val srcLocation = getDrugTestTbodyAttribute(rightTbody, 2)
+
+    val submitterLocation = getDrugTestTbodyAttribute(rightTbody, 3)
+
+    val colour = getDrugTestTbodyAttribute(rightTbody, 4)
+
+    val size = getDrugTestTbodyAttribute(rightTbody, 5)
 
     val row = Row(
+      id,
       soldAs,
       sampleName,
       substances,
